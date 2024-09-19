@@ -13,7 +13,6 @@ import java.net.URISyntaxException;
 
 
 /**
- *
  * @author Andres Arias
  */
 public class CalcReflexServer {
@@ -75,6 +74,8 @@ public class CalcReflexServer {
 
     }
 
+
+
     public static String getDefaultResponse() {
         String htmlcode
                 = "HTTP/1.1 200 OK\r\n"
@@ -124,11 +125,11 @@ public class CalcReflexServer {
     }
 
 
-    public static String computeMathCommand(String command) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException{
+    public static String computeMathCommand(String command) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         Class c = Math.class;
-        Class [] parametersTypes = {double.class};
+        Class[] parametersTypes = {double.class};
         Method m = c.getDeclaredMethod("abs", parametersTypes);
-        Object[] params = {-2,0};
+        Object[] params = {-2, 0};
         String resp = m.invoke(null, (Object) params).toString();
         return "";
     }

@@ -1,15 +1,20 @@
 package org.example;
 
+import com.google.gson.Gson;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.Objects;
 
 
 /**
@@ -17,12 +22,12 @@ import java.net.URISyntaxException;
  */
 public class CalcReflexServer {
 
-    public static void main(String[] args) throws IOException, URISyntaxException {
+    public static void main(String[] args) throws IOException, URISyntaxException, InvocationTargetException, NoSuchMethodException, IllegalAccessException, NoSuchFieldException {
         ServerSocket serverSocket = null;
         try {
             serverSocket = new ServerSocket(36000);
         } catch (IOException e) {
-            System.err.println("Could not listen on port: 35000.");
+            System.err.println("Could not listen on port: 36000.");
             System.exit(1);
         }
 
@@ -55,12 +60,40 @@ public class CalcReflexServer {
             }
 
             URI requestURL = getRequestURI(firstLine);
-
             if (requestURL.getPath().startsWith("/compreflex")) {
+
+                String command = requestURL.getQuery().substring(8);
+
+                int startIndex = command.indexOf('(');
+                int endIndex = command.indexOf(')');
+
+                String operation = command.substring(0, startIndex);
+
+                Double[] params = {};
+
+                if (startIndex != -1 && endIndex != -1) {
+                    String paramString = command.substring(startIndex + 1, endIndex);
+                    String[] paramStrings = paramString.split(",");
+                    params = new Double[paramStrings.length];
+
+                    System.out.println(Arrays.toString(paramStrings));
+
+
+                    if(paramStrings.length > 0 && !paramStrings[0].trim().isEmpty()){
+                        for (int i = 0; i < paramStrings.length; i++) {
+                            params[i] = Double.parseDouble(paramStrings[i].trim());
+                        }
+                    }
+                    else{
+                        params = new Double[0];
+                        operation = command.substring(0, command.length() - 2);
+                    }
+
+                }
                 outputLine = "HTTP/1.1 200 OK\r\n"
                         + "Content-Type: application/json\r\n"
                         + "\r\n"
-                        + "{\"name\":\"John\", \"age\":30, \"car\":null}";
+                        + responseParam(operation, params);
             } else {
                 outputLine = getDefaultResponse();
             }
@@ -74,7 +107,43 @@ public class CalcReflexServer {
 
     }
 
+    public static String responseParam(String command, Double[] params) throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException, NoSuchFieldException{
 
+        Gson gson = new Gson();
+        String response = "";
+
+        Class c = Math.class;
+
+
+
+        System.out.println(Arrays.toString(params));
+        System.out.println(command);
+
+        if(command.equals("bbl")){
+            Double[] result = bubbleSort(params);
+            response = gson.toJson(result);
+        }
+
+        else if(params.length==0){
+            Field f = c.getDeclaredField(command);
+            double result = (double) f.get(null);
+            response = gson.toJson(result);
+        }
+
+        else if(params.length==1){
+            Class [] parametersTypes = {double.class};
+            Method m = c.getDeclaredMethod(command, parametersTypes);
+            response = gson.toJson(m.invoke(null, (Object) params[0]).toString());
+        }
+
+        else if(params.length==2){
+            Class [] parametersTypes = {double.class, double.class};
+            Method m = c.getDeclaredMethod(command, parametersTypes);
+            response = gson.toJson(m.invoke(null, params[0], params[1]).toString());
+        }
+
+        return response;
+    }
 
     public static String getDefaultResponse() {
         String htmlcode
@@ -89,9 +158,9 @@ public class CalcReflexServer {
                 + "        <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
                 + "    </head>\n"
                 + "    <body>\n"
-                + "        <h1>Form with GET</h1>\n"
+                + "        <h1>Free Calculator</h1>\n"
                 + "        <form action=\"/hello\">\n"
-                + "            <label for=\"name\">Name:</label><br>\n"
+                + "            <label for=\"name\">Operation: </label><br>\n"
                 + "            <input type=\"text\" id=\"name\" name=\"name\" value=\"John\"><br><br>\n"
                 + "            <input type=\"button\" value=\"Submit\" onclick=\"loadGetMsg()\">\n"
                 + "        </form> \n"
@@ -117,40 +186,43 @@ public class CalcReflexServer {
     }
 
     public static URI getRequestURI(String firstline) throws URISyntaxException {
-
         String ruri = firstline.split(" ")[1];
-
         return new URI(ruri);
-
     }
 
-    static void bubbleSort(int[] arr) {
-        int n = arr.length;
-        boolean swapped;
-
-        for (int i = 0; i < n - 1; i++) {
-            swapped = false; // Se asume que no hay intercambios al principio
-            for (int j = 0; j < n - i - 1; j++) {
-                if (arr[j] > arr[j + 1]) {
-                    // Intercambiar arr[j] y arr[j+1]
-                    int temp = arr[j];
-                    arr[j] = arr[j + 1];
-                    arr[j + 1] = temp;
-                    swapped = true; // Se realizó un intercambio
-                }
-            }
-            // Si no se realizaron intercambios, el arreglo ya está ordenado
-            if (!swapped) break;
-        }
-    }
-
-    public static String computeMathCommand(String command) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+    public static String computeMathCommand(String command) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException{
         Class c = Math.class;
-        Class[] parametersTypes = {double.class};
+        Class [] parametersTypes = {double.class};
         Method m = c.getDeclaredMethod("abs", parametersTypes);
-        Object[] params = {-2, 0};
+        Object[] params = {-2,0};
         String resp = m.invoke(null, (Object) params).toString();
         return "";
     }
 
+    private static Double[] convertDoubles(String[] values){
+        Double[] params = new Double[values.length];
+        for (int i = 0; i < values.length; i++) {
+            params[i] = Double.parseDouble(values[i]);
+        }
+        return params;
+    }
+
+    static Double[] bubbleSort(Double[] arr) {
+        int n = arr.length;
+        boolean swapped;
+
+        for (int i = 0; i < n - 1; i++) {
+            swapped = false;
+            for (int j = 0; j < n - i - 1; j++) {
+                if (arr[j] > arr[j + 1]) {
+                    Double temp = arr[j];
+                    arr[j] = arr[j + 1];
+                    arr[j + 1] = temp;
+                    swapped = true;
+                }
+            }
+            if (!swapped) break;
+        }
+        return arr;
+    }
 }

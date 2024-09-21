@@ -54,17 +54,15 @@ public class CalcReflexFacade {
             }
 
             URI requestQuery = getRequestURI(firstLine);
-
             if (requestQuery.getPath().startsWith("/computar")) {
                 outputLine = "HTTP/1.1 200 OK\r\n"
                         + "Content-Type: application/json\r\n"
                         + "\r\n"
                         + HttpConnectionExample.getResponse("/compreflex?" + requestQuery.getQuery());
+
             } else {
                 outputLine = htmlClient();
             }
-
-            //outputLine = htmlClient();
             out.println(outputLine);
             out.close();
             in.close();
@@ -87,10 +85,10 @@ public class CalcReflexFacade {
                 + "        <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
                 + "    </head>\n"
                 + "    <body>\n"
-                + "        <h1>Form with GET</h1>\n"
+                + "        <h1>Free Calculator</h1>\n"
                 + "        <form action=\"/hello\">\n"
-                + "            <label for=\"name\">Name:</label><br>\n"
-                + "            <input type=\"text\" id=\"comando\" name=\"comando\" value=\"max(1.0, 2.0)\"><br><br>\n"
+                + "            <label for=\"name\">Operation:</label><br>\n"
+                + "            <input type=\"text\" id=\"comando\" name=\"comando\" value=\"bbl(14.2,5.4,58.4,0.0,0.1,2,3)\"><br><br>\n"
                 + "            <input type=\"button\" value=\"Submit\" onclick=\"loadGetMsg()\">\n"
                 + "        </form> \n"
                 + "        <div id=\"getrespmsg\"></div>\n"
@@ -121,5 +119,5 @@ public class CalcReflexFacade {
         return new URI(ruri);
 
     }
-
 }
+

@@ -44,5 +44,4 @@ public class HttpConnectionExample {
         System.out.println("GET DONE");
         return responseString;
     }
-
 }

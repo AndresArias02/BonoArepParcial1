@@ -69,11 +69,11 @@ Es necesario tener instalado Git, Maven 3.9.9 y Java 17 para poder ejecutar el p
 4. **Ejecuta los siguientes comandos en terminales diferentes:**
 
     ```bash
-    java -cp target/classes arep.bono.CalcReflexServer
+    java -cp target/classes org.example.CalcReflexServer
     ```
 
     ```bash
-    java -cp target/classes arep.bono.CalcReflexFacade
+    java -cp target/classes org.example.CalcReflexFacade
     ```
 
 El proyecto estará funcionando. Para abrirlo, accede al siguiente enlace en tu navegador: [http://localhost:35000](http://localhost:35000).

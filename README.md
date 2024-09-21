@@ -69,8 +69,10 @@ Es necesario tener instalado Git, Maven 3.9.9 y Java 17 para poder ejecutar el p
 4. **Ejecuta los siguientes comandos en terminales diferentes:**
 
     ```bash
-    java -cp target/classes org.example.CalcReflexServer
+    mvn exec:java -Dexec.mainClass="org.example.CalcReflexServer"
+
     ```
+    mvn exec:java -Dexec.mainClass="org.example.CalcReflexFacade"
 
     ```bash
     java -cp target/classes org.example.CalcReflexFacade

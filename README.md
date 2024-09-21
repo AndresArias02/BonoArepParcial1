@@ -70,12 +70,11 @@ Es necesario tener instalado Git, Maven 3.9.9 y Java 17 para poder ejecutar el p
 
     ```bash
     mvn exec:java -Dexec.mainClass="org.example.CalcReflexServer"
-
     ```
-    mvn exec:java -Dexec.mainClass="org.example.CalcReflexFacade"
+   
 
     ```bash
-    java -cp target/classes org.example.CalcReflexFacade
+    mvn exec:java -Dexec.mainClass="org.example.CalcReflexFacade"
     ```
 
 El proyecto estará funcionando. Para abrirlo, accede al siguiente enlace en tu navegador: [http://localhost:35000](http://localhost:35000).
